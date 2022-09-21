@@ -5,3 +5,10 @@ api-version: 1.19
 authors: [ SakakiAruka ]
 description: generate custom dimension
 website: https://github.com/Sakaki-Aruka
+commands:
+  dc:
+    permission: dimensioncreator.op
+
+permissions:
+  dimensioncreator.op:
+    default: op
