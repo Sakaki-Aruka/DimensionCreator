@@ -1,0 +1,7 @@
+name: DimensionCreator
+version: '${project.version}'
+main: dimensioncreator.dimensioncreator.DimensionCreator
+api-version: 1.19
+authors: [ SakakiAruka ]
+description: generate custom dimension
+website: https://github.com/Sakaki-Aruka
