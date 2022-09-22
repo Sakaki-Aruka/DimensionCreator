@@ -1,5 +1,6 @@
 package dimensioncreator.dimensioncreator;
 
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
@@ -19,18 +20,37 @@ public class GeneratorCore implements CommandExecutor, TabCompleter {
         /*
         args description
 
-        /dc [1] [2] [3] [4]
+        (generate)
+        /dc [0] [1] [2] [3]
+
+        [0]:worldName
+        [1]:environment (normal,nether,end,custom)
+        [2]:generate structures (true,false)
+        [3]:world type (amplified,flat,large_biomes,normal)
+
+        (unload)
+        /dc unload [1] [2]
 
         [1]:worldName
-        [2]:environment (normal,nether,end,custom)
-        [3]:generate structures (true,false)
-        [4]:world type (amplified,flat,large_biomes,normal)
+        [2]:save (true,false)
 
          */
         Player player = (Player) sender;
         if(args.length != 4){
-            player.sendMessage("§c[Dimension Creator]:Invalid options.Fail to create a world.");
-            return false;
+            if(args[0].equalsIgnoreCase("unload") && args.length ==3){
+                for(World world : Bukkit.getWorlds()){
+                    if(args[1].equalsIgnoreCase(world.getName())){
+                        Bukkit.unloadWorld(world,Boolean.valueOf(args[2]));
+                        player.sendMessage("§a[Dimension Creator]:"+world.getName()+" unload successful.");
+                    }
+                }
+                player.sendMessage("§c[Dimension Creator]:"+args[1]+" unload failed.");
+                return false;
+
+            }else {
+                player.sendMessage("§c[Dimension Creator]:Invalid options.Fail to create a world.");
+                return false;
+            }
         }
         try{
             String worldName = args[0];
@@ -42,7 +62,7 @@ public class GeneratorCore implements CommandExecutor, TabCompleter {
             worldCreator.type(worldType);
 
             player.sendMessage("§2[Dimension Creator]:Creating the dimension.\n[Dimension Creator]:options:"+worldCreator);
-            worldCreator.createWorld();
+            Bukkit.createWorld(worldCreator);
             player.sendMessage("§a[Dimension Creator]:Finish to create the dimension.");
             return true;
         }catch (Exception exception){
@@ -57,16 +77,26 @@ public class GeneratorCore implements CommandExecutor, TabCompleter {
         if(args.length == 1){
             return null;
         }else if(args.length == 2){
-            return tabCompleterSupport(new ArrayList<>(Arrays.asList("NORMAL","NETHER","END","CUSTOM")),args[1]);
+            if(args[0].equalsIgnoreCase("unload")){
+                ArrayList<String> worlds = new ArrayList<>();
+                for(World world : Bukkit.getWorlds()){
+                    worlds.add(world.getName());
+                }
+                return tabCompleterSupport(worlds,args[1].toUpperCase(Locale.ROOT));
+
+            }else{
+                return tabCompleterSupport(new ArrayList<>(Arrays.asList("NORMAL","NETHER","THE_END","CUSTOM")),args[1].toUpperCase(Locale.ROOT));
+            }
+
         }else if(args.length == 3){
-            return tabCompleterSupport(new ArrayList<>(Arrays.asList("true","false")),args[2]);
-        }else if(args.length == 4){
-            return tabCompleterSupport(new ArrayList<>(Arrays.asList("AMPLIFIED","FLAT","LARGE_BIOMES","NORMAL")),args[3]);
+            return tabCompleterSupport(new ArrayList<>(Arrays.asList("true","false")),args[2].toUpperCase(Locale.ROOT));
+        }else if(args.length == 4 && !(args[0].equalsIgnoreCase("unload"))){
+            return tabCompleterSupport(new ArrayList<>(Arrays.asList("AMPLIFIED","FLAT","LARGE_BIOMES","NORMAL")),args[3].toUpperCase(Locale.ROOT));
         }
         return null;
     }
 
-    public List<String> tabCompleterSupport(ArrayList<String> array,String input){
+    public ArrayList<String> tabCompleterSupport(ArrayList<String> array,String input){
         ArrayList<String> settings = new ArrayList<>();
         for(String loop : array){
             if(loop.contains(input)){
@@ -74,7 +104,7 @@ public class GeneratorCore implements CommandExecutor, TabCompleter {
             }
         }
         if(settings.size() != 0){
-            return array;
+            return settings;
         }else{
             return null;
         }
